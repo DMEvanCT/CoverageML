@@ -9,9 +9,6 @@ app = Flask(__name__)
 def predict():
     # Load the trained model from a file
     loaded_model = pickle.load(open("auto_insurance_model.pkl", 'rb'))
-    driving_record_Excellent = 0
-    driving_record_Good = 0
-    driving_record_Poor = 0
     # Get the input data from the request
     data = request.get_json(force=True)
     age = data['age']
