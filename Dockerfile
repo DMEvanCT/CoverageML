@@ -10,10 +10,11 @@ COPY auto_insurance_model.pkl .
 COPY requirements.txt .
 
 # Install the required packages
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt && \
+    pip install scikit-learn
 
 # Specify the command to run the API
 CMD ["python", "api.py"]
 
 # Expose the API on port 8080
-EXPOSE 5000
+EXPOSE 8080
