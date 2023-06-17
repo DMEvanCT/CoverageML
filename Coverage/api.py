@@ -24,6 +24,7 @@ def predict():
 
     # Return the prediction as a JSON response
     response = jsonify({'prediction': prediction.tolist()})
+
     return response
 
 

@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy the required files to the container
 COPY api.py .
 COPY auto_insurance_model.pkl .
-COPY requirements.txt .
+COPY ../requirements.txt .
 
 # Install the required packages
 RUN pip install -r requirements.txt
