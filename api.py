@@ -1,15 +1,19 @@
 from flask import Flask, request, jsonify
 import pickle
 import numpy as np
-import sklearn
+import tensorflow as tf
+from tensorflow import keras
+
 
 app = Flask(__name__)
+
+
 
 
 @app.route('/api/v1/coverage', methods=['POST'])
 def predict():
     # Load the trained model from a file
-    loaded_model = pickle.load(open("auto_insurance_model.pkl", 'rb'))
+    insurance_model = tf.keras.models.load_model('insurance/coveraged_dec')
     # Get the input data from the request
     data = request.get_json(force=True)
     age = data['age']
@@ -21,11 +25,11 @@ def predict():
 
     # Make a prediction using the loaded model
     input_data = np.array([[age, number_of_tickets, number_of_accidents, married, owns_car, years_licensed ]])
-    prediction = loaded_model.predict(input_data)
+    prediction = cov_model.predict(input_data, verbose=0)
 
-    # Return the prediction as a JSON response
-    response = jsonify({'prediction': prediction.tolist()})
+    response = jsonify({'prediction': prediction})
     return response
+
 
 
 if __name__ == '__main__':
