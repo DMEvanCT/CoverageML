@@ -1,37 +1,55 @@
 from flask import Flask, request, jsonify
-import pickle
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
-
+from waitress import serve
+import tensorflow_decision_forests as tfdf
 
 app = Flask(__name__)
 
-
+# Load the trained model from a file
+try:
+    insurance_model = tf.keras.models.load_model('insurance/coverage_dec')
+    print(insurance_model.summary())
+except Exception as e:
+    print("Error loading model", e)
+    insurance_model = None
 
 
 @app.route('/api/v1/coverage', methods=['POST'])
 def predict():
-    # Load the trained model from a file
-    insurance_model = tf.keras.models.load_model('insurance/coveraged_dec')
-    # Get the input data from the request
-    data = request.get_json(force=True)
-    age = data['age']
-    number_of_accidents = data['number_of_accidents']
-    number_of_tickets = data['number_of_tickets']
-    married = data['married']
-    owns_car = data['owns_car']
-    years_licensed = data['years_licensed']
+    print("Predicting")
+    if insurance_model is None:
+        return jsonify({'error': 'Model not loaded'}), 500
 
-    # Make a prediction using the loaded model
-    input_data = np.array([[age, number_of_tickets, number_of_accidents, married, owns_car, years_licensed ]])
-    prediction = cov_model.predict(input_data, verbose=0)
+    try:
+        # Get the input data from the request
+        data = request.get_json(force=True)
+        age = data['age']
+        number_of_accidents = data['number_of_accidents']
+        number_of_tickets = data['number_of_tickets']
+        married = int(data['married'])  # Convert boolean to int
+        owns_car = int(data['owns_car'])  # Convert boolean to int
+        years_licensed = data['years_licensed']
 
-    response = jsonify({'prediction': prediction})
-    return response
+        # Convert booleans to int
+        married_int = int(data['married'])
+        owns_car_int = int(data['owns_car'])
 
+        # Create a 1D NumPy array
+        single_record = np.array(
+            [data['age'], data['number_of_accidents'], data['number_of_tickets'], married_int, owns_car_int,
+             data['years_licensed']])
+        tf_serving_dataset = tfdf.keras.pd_dataframe_to_tf_dataset(single_record, label=None)
+
+        prediction = insurance_model.predict(tf_serving_dataset,
+                                             verbose=0).tolist()  # Converting numpy array to list for jsonify
+
+        return jsonify({'prediction': prediction[0]})
+    except Exception as er:
+        print("Error during prediction", er)
+        return jsonify({'error': 'Error during prediction'}), 500
 
 
 if __name__ == '__main__':
-    from waitress import serve
+    print("Starting")
     serve(app, host="0.0.0.0", port=8080)
