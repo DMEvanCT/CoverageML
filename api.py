@@ -47,7 +47,7 @@ def predict():
         }])
         tf_serving_dataset = tfdf.keras.pd_dataframe_to_tf_dataset(input_df, label=None)
 
-        prediction = insurance_model.predict(input_df,
+        prediction = insurance_model.predict(tf_serving_dataset,
                                              verbose=0).tolist()  # Converting numpy array to list for jsonify
 
         return jsonify({'prediction': prediction[0]})
