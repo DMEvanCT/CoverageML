@@ -10,8 +10,7 @@ COPY auto_insurance_model.pkl .
 COPY requirements.txt .
 
 # Install the required packages
-RUN pip install -r requirements.txt && \
-    pip install scikit-learn
+RUN pip install -r requirements.txt
 
 # Specify the command to run the API
 CMD ["python", "api.py"]
